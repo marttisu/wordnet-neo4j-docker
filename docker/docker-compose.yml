@@ -1,0 +1,33 @@
+version: '3.5'
+services:
+  neo4j:
+    #image: neo4j:3.4.8
+    build:
+      args:
+        NEO4J_VERSION: 3.4
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - neo4j.env
+      - neo4j_auth.env
+    healthcheck:
+      # https://neo4j.com/docs/operations-manual/current/monitoring/causal-cluster/http-endpoints/
+      test: ["CMD", "curl", "-f",
+        "localhost:7474/db/manage/server/core/available"]
+      interval: 10m
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+    ports:
+      - 7474:7474
+      - 7473:7473
+      - 7687:7687
+    restart: always
+    # https://github.com/neo4j/docker-neo4j/issues/131
+    #user: ${CURRENT_UID:-101}
+    volumes:
+      - neo4j-data:/data
+    #  - neo4j-logs:/neologs
+volumes:
+  neo4j-data:
+#  neo4j-logs:
